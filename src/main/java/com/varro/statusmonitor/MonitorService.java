@@ -35,7 +35,7 @@ public class MonitorService {
     }
 
     private SimpleResponse processNewStatus(Status status) {
-        if(statuses.get().size() >= MAX_STATUS_LENGTH) {
+        if(statuses.get().size() == MAX_STATUS_LENGTH) {
             long uniqueStatuses = statuses.get().stream().map(Status::getSource).distinct().count();
             if(uniqueStatuses == statuses.get().size() || uniqueStatuses == 1) {
                 statuses.get().remove(0);
@@ -48,6 +48,9 @@ public class MonitorService {
                             break;
                         }
                     }
+                }
+                if(statuses.get().size() == MAX_STATUS_LENGTH) {
+                    statuses.get().remove(0);
                 }
             }
         }
