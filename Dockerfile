@@ -2,7 +2,7 @@ FROM gradle:8.5-jdk17 AS build
 WORKDIR /app
 
 # Copy only the gradle wrapper and build files first to leverage Docker caching
-COPY build.gradle settings.gradle gradle.properties gradlew /app/
+COPY build.gradle settings.gradle gradlew /app/
 COPY gradle /app/gradle
 
 # Run gradle wrapper to download dependencies (layer caching optimization)
