@@ -24,7 +24,7 @@ repositories {
 }
 
 bootJar {
-    archiveFileName = 'status-monitor.jar'
+    enabled = false
 }
 
 dependencies {
