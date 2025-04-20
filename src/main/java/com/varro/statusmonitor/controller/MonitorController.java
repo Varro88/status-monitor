@@ -40,6 +40,4 @@ public class MonitorController {
         SimpleResponse resp = monitorService.addStatus(new Status(source, zonedDateTime));
         return new ResponseEntity<>(resp.getMessage(), resp.getHttpStatus());
     }
-
-
 }
