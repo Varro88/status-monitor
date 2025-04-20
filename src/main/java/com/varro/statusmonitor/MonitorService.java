@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -79,6 +76,8 @@ public class MonitorService {
     }
 
     public List<Status> getStatuses() {
-        return statuses.get();
+        List<Status> reversedList = new ArrayList<>(statuses.get());
+        Collections.reverse(reversedList);
+        return reversedList;
     }
 }
