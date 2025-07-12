@@ -29,7 +29,7 @@ fetch('/monitor')
         const tableBody = document.querySelector('#statuses tbody');
         tableBody.innerHTML = ''; // Clear loading message
 
-        if (data.length === 0) {
+        if (data.statuses.length === 0) {
             const emptyRow = document.createElement('tr');
             const emptyCell = document.createElement('td');
             emptyCell.colSpan = 2;
