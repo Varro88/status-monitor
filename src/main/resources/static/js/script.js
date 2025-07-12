@@ -24,6 +24,8 @@ function formatDateTime(isoString) {
 fetch('/monitor')
     .then(response => response.json())
     .then(data => {
+        document.querySelector('#since').textContent = formatDateTime(data.since);
+
         const tableBody = document.querySelector('#statuses tbody');
         tableBody.innerHTML = ''; // Clear loading message
 
@@ -38,7 +40,7 @@ fetch('/monitor')
             return;
         }
 
-        data.forEach(item => {
+        data.statuses.forEach(item => {
             const tr = document.createElement('tr');
 
             const tdStatus = document.createElement('td');

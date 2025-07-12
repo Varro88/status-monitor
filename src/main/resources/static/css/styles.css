@@ -14,10 +14,15 @@ body {
 h1 {
     color: #bb86fc;
     text-align: center;
-    margin: 15px 0 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #bb86fc;
+    margin: 5px 0;
     font-size: 1.8rem;
+}
+
+h4 {
+    color: #bb86fc;
+    text-align: center;
+    margin: 2px;
+    border-bottom: 2px solid #bb86fc;
 }
 
 #statuses {

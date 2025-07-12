@@ -1,6 +1,7 @@
 package com.varro.statusmonitor.controller;
 
 import com.varro.statusmonitor.MonitorService;
+import com.varro.statusmonitor.model.MonitorData;
 import com.varro.statusmonitor.model.SimpleResponse;
 import com.varro.statusmonitor.model.Status;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -28,8 +28,8 @@ public class MonitorController {
     }
 
     @GetMapping("/monitor")
-    public ResponseEntity<List<Status>> getStatuses() {
-        return new ResponseEntity<>(monitorService.getStatuses(), HttpStatus.OK);
+    public ResponseEntity<MonitorData> getStatuses() {
+        return new ResponseEntity<>(monitorService.getMonitorData(), HttpStatus.OK);
     }
 
     @GetMapping("/monitor/legacy")
