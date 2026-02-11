@@ -60,7 +60,7 @@ public class MonitorService {
 
         try {
             monitorData.get().setStatuses(statuses);
-            Utils.saveToJsonFile(statuses, fileName);
+            Utils.saveToJsonFile(monitorData, fileName);
         } catch (IOException e) {
             String errorText = String.format("Failed to save data to file: %s", e.getMessage());
             log.error(errorText, e);
