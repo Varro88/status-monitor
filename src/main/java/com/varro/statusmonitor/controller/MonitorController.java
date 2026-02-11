@@ -4,6 +4,7 @@ import com.varro.statusmonitor.MonitorService;
 import com.varro.statusmonitor.model.MonitorData;
 import com.varro.statusmonitor.model.SimpleResponse;
 import com.varro.statusmonitor.model.Status;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,23 +22,42 @@ public class MonitorController {
         this.monitorService = monitorService;
     }
 
-    @PostMapping("/monitor")
-    public ResponseEntity<String> addStatus(@RequestBody Status status) {
-        SimpleResponse resp = monitorService.addStatus(status);
-        return new ResponseEntity<>(resp.getMessage(), resp.getHttpStatus());
-    }
-
     @GetMapping("/monitor")
     public ResponseEntity<MonitorData> getStatuses() {
         return new ResponseEntity<>(monitorService.getMonitorData(), HttpStatus.OK);
     }
 
+    @PostMapping("/monitor")
+    public ResponseEntity<String> addStatus(@RequestBody Status status, HttpServletRequest request) {
+        status.setIp(getClientIpAddress(request));
+
+        SimpleResponse resp = monitorService.addStatus(status);
+        return new ResponseEntity<>(resp.getMessage(), resp.getHttpStatus());
+    }
+
     @GetMapping("/monitor/legacy")
     public ResponseEntity<String> addStatusLegacy(@RequestParam(value = "source") String source,
-                                                  @RequestParam(value = "timestamp", required = false) String timestamp) {
+                                                  @RequestParam(value = "timestamp", required = false) String timestamp,
+                                                  HttpServletRequest request) {
+        String clientIp = getClientIpAddress(request);
+
         ZonedDateTime zonedDateTime = timestamp == null ? ZonedDateTime.now()
                 : ZonedDateTime.parse(timestamp.replace(" ","+"));
-        SimpleResponse resp = monitorService.addStatus(new Status(source, zonedDateTime));
+        SimpleResponse resp = monitorService.addStatus(new Status(source, zonedDateTime, clientIp));
         return new ResponseEntity<>(resp.getMessage(), resp.getHttpStatus());
+    }
+
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty()) {
+            return xRealIp;
+        }
+
+        return request.getRemoteAddr();
     }
 }

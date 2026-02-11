@@ -12,4 +12,5 @@ import java.time.ZonedDateTime;
 public class Status {
     private String source;
     private ZonedDateTime timestamp;
+    private String ip;
 }

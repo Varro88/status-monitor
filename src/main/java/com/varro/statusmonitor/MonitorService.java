@@ -24,6 +24,9 @@ public class MonitorService {
     @Value("${spring.application.statuses.max}")
     private int MAX_STATUS_LENGTH;
 
+    @Value("${spring.application.statuses.repeats}")
+    private int STATUS_REPEATS;
+
     @Value("${spring.application.file.name}")
     private String fileName;
 
@@ -40,48 +43,17 @@ public class MonitorService {
     private SimpleResponse processNewStatus(Status newStatus) {
         List<Status> statuses = monitorData.get().getStatuses();
 
-        if(statuses.size() >= MAX_STATUS_LENGTH) {
-            long uniqueStatuses = statuses.stream().map(Status::getSource).distinct().count();
-            if(uniqueStatuses == statuses.size() || uniqueStatuses == 1) {
-                statuses.remove(statuses.get(0));
-            } else {
-                Map<String, Integer> occurrences = new HashMap<>();
-                for (Status s : statuses) {
-                    if(occurrences.containsKey(s.getSource())) {
-                        occurrences.put(s.getSource(), occurrences.get(s.getSource()) + 1);
-                    } else  {
-                        occurrences.put(s.getSource(), 1);
-                    }
-                }
+        long sameStatusNum = statuses.stream()
+                .filter( it -> it.getSource().equals(newStatus.getSource())).count();
 
-                Set<String> twoOrMore = occurrences.entrySet().stream()
-                        .filter(x -> x.getValue() > 1)
-                        .map(Map.Entry::getKey)
-                        .collect(Collectors.toSet());
-
-                if(!twoOrMore.isEmpty()) {
-                    Status statusToRemove = null;
-
-                    for (Status status : statuses) {
-                        if (!twoOrMore.contains(status.getSource())) {
-                            continue;
-                        }
-
-                        if (statusToRemove == null) {
-                            statusToRemove = status;
-                        }
-
-                        if (statusToRemove.getTimestamp().isAfter(status.getTimestamp())) {
-                            statusToRemove = status;
-                        }
-                    }
-                    statuses.remove(statusToRemove);
-
-                } else {
-                    statuses.remove(statuses.get(0));
-                }
-            }
+        if (sameStatusNum > STATUS_REPEATS) {
+            statuses = removeOldest(statuses, newStatus.getSource());
         }
+
+        while(statuses.size() > MAX_STATUS_LENGTH) {
+            statuses = removeOldest(statuses, null);
+        }
+
         newStatus.setTimestamp(ZonedDateTime.now().withZoneSameInstant(ZoneId.of(timezoneName)));
         statuses.add(newStatus);
         try {
@@ -92,19 +64,47 @@ public class MonitorService {
         return new SimpleResponse("OK", HttpStatus.OK);
     }
 
-    public MonitorData getMonitorData() {
-        MonitorData data;
-
-        try {
-            data = Utils.readFromJsonFile(fileName, MonitorData.class);
-        } catch (IOException exception) {
-            log.warn("Failed to read file: {}", exception.getMessage());
-            data = monitorData.get();
+    public List<Status> removeOldest(List<Status> items, String newStatus) {
+        Status oldest;
+        if(newStatus != null) {
+            oldest = items.stream()
+                    .filter(item -> item.getSource().equals(newStatus))
+                    .min(Comparator.comparing(Status::getTimestamp))
+                    .orElse(null);
+        } else {
+            oldest = items.stream()
+                    .min(Comparator.comparing(Status::getTimestamp))
+                    .orElse(null);
         }
 
-        return new MonitorData(data.getSince(), data.getStatuses().stream()
-                .sorted(Comparator.comparing(Status::getTimestamp)
-                        .reversed())
-                .collect(Collectors.toList()));
+        if (oldest == null) {
+            return new ArrayList<>(items);
+        }
+
+        boolean[] removed = {false};
+        return items.stream()
+                .filter(item -> {
+                    if (!removed[0] && item == oldest) {
+                        removed[0] = true;
+                        return false;
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+    public MonitorData getMonitorData() {
+        try {
+            MonitorData data = Utils.readFromJsonFile(fileName, MonitorData.class);
+            return new MonitorData(data.getSince(), data.getStatuses().stream()
+                    .sorted(Comparator
+                            .comparing(Status::getTimestamp)
+                            .reversed())
+                    .collect(Collectors.toList()));
+        } catch (IOException exception) {
+            log.warn("Failed to read file: {}", exception.getMessage());
+            return monitorData.get();
+        }
     }
 }
