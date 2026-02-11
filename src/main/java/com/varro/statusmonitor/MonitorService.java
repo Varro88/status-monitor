@@ -42,24 +42,29 @@ public class MonitorService {
 
     private SimpleResponse processNewStatus(Status newStatus) {
         List<Status> statuses = monitorData.get().getStatuses();
+        String source = newStatus.getSource();
 
-        long sameStatusNum = statuses.stream()
-                .filter( it -> it.getSource().equals(newStatus.getSource())).count();
+        newStatus.setTimestamp(ZonedDateTime.now().withZoneSameInstant(ZoneId.of(timezoneName)));
+        statuses.add(newStatus);
 
-        if (sameStatusNum > STATUS_REPEATS) {
-            statuses = removeOldest(statuses, newStatus.getSource());
+        long sameStatusNum = statuses.stream().filter( it -> it.getSource().equals(source)).count();
+
+        while (sameStatusNum > STATUS_REPEATS) {
+            statuses = removeOldest(statuses, source);
+            sameStatusNum = statuses.stream().filter( it -> it.getSource().equals(source)).count();
         }
 
         while(statuses.size() > MAX_STATUS_LENGTH) {
             statuses = removeOldest(statuses, null);
         }
 
-        newStatus.setTimestamp(ZonedDateTime.now().withZoneSameInstant(ZoneId.of(timezoneName)));
-        statuses.add(newStatus);
         try {
-            Utils.saveToJsonFile(monitorData, fileName);
+            monitorData.get().setStatuses(statuses);
+            Utils.saveToJsonFile(statuses, fileName);
         } catch (IOException e) {
-            log.error("Failed to save data to file: {}", e.getMessage());
+            String errorText = String.format("Failed to save data to file: %s", e.getMessage());
+            log.error(errorText, e);
+            return new SimpleResponse(errorText, HttpStatus.BAD_REQUEST);
         }
         return new SimpleResponse("OK", HttpStatus.OK);
     }
