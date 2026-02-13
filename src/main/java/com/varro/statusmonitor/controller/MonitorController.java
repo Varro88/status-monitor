@@ -28,22 +28,17 @@ public class MonitorController {
     }
 
     @PostMapping("/monitor")
-    public ResponseEntity<String> addStatus(@RequestBody Status status, HttpServletRequest request) {
-        status.setIp(getClientIpAddress(request));
-
+    public ResponseEntity<String> addStatus(@RequestBody Status status) {
         SimpleResponse resp = monitorService.addStatus(status);
         return new ResponseEntity<>(resp.getMessage(), resp.getHttpStatus());
     }
 
     @GetMapping("/monitor/legacy")
     public ResponseEntity<String> addStatusLegacy(@RequestParam(value = "source") String source,
-                                                  @RequestParam(value = "timestamp", required = false) String timestamp,
-                                                  HttpServletRequest request) {
-        String clientIp = getClientIpAddress(request);
-
+                                                  @RequestParam(value = "timestamp", required = false) String timestamp) {
         ZonedDateTime zonedDateTime = timestamp == null ? ZonedDateTime.now()
                 : ZonedDateTime.parse(timestamp.replace(" ","+"));
-        SimpleResponse resp = monitorService.addStatus(new Status(source, zonedDateTime, clientIp));
+        SimpleResponse resp = monitorService.addStatus(new Status(source, zonedDateTime));
         return new ResponseEntity<>(resp.getMessage(), resp.getHttpStatus());
     }
 
