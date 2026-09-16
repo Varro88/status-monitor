@@ -51,8 +51,12 @@ fetch('/monitor')
             tdTime.textContent = formatDateTime(item.timestamp);
             tdTime.className = 'timestamp';
 
+            const tdIp = document.createElement('td');
+            tdIp.textContent = item.ip;
+
             tr.appendChild(tdStatus);
             tr.appendChild(tdTime);
+            tr.appendChild(tdIp);
             tableBody.appendChild(tr);
         });
     })
