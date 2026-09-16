@@ -23,8 +23,8 @@ public class MonitorController {
     }
 
     @GetMapping("/monitor")
-    public ResponseEntity<MonitorData> getStatuses() {
-        return new ResponseEntity<>(monitorService.getMonitorData(), HttpStatus.OK);
+    public ResponseEntity<MonitorData> getStatuses(@RequestParam(value = "ip", required = false) boolean ip) {
+        return new ResponseEntity<>(monitorService.getMonitorData(ip), HttpStatus.OK);
     }
 
     @PostMapping("/monitor")
@@ -34,6 +34,7 @@ public class MonitorController {
         return new ResponseEntity<>(resp.getMessage(), resp.getHttpStatus());
     }
 
+    @GetMapping("/monitor/legacy")
     public ResponseEntity<String> addStatusLegacy(@RequestParam(value = "source") String source,
                                                   @RequestParam(value = "timestamp", required = false) String timestamp,
                                                   HttpServletRequest request) {

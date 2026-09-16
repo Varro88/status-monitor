@@ -99,9 +99,12 @@ public class MonitorService {
     }
 
 
-    public MonitorData getMonitorData() {
+    public MonitorData getMonitorData(boolean withIp) {
         try {
             MonitorData data = Utils.readFromJsonFile(fileName, MonitorData.class);
+            if (!withIp) {
+                data.getStatuses().forEach(it -> it.setIp(""));
+            }
             return new MonitorData(data.getSince(), data.getStatuses().stream()
                     .sorted(Comparator
                             .comparing(Status::getTimestamp)

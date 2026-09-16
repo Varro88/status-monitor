@@ -51,12 +51,21 @@ fetch('/monitor')
             tdTime.textContent = formatDateTime(item.timestamp);
             tdTime.className = 'timestamp';
 
-            const tdIp = document.createElement('td');
-            tdIp.textContent = item.ip;
+            if(item.ip !== undefined && item.ip != null && item.ip !== "") {
+                const tdIp = document.createElement('td');
+                tdIp.textContent = item.ip;
+                tr.appendChild(tdStatus);
+                tr.appendChild(tdTime);
+                tr.appendChild(tdIp);
+            }
+            else {
+                document.getElementById("ip-header").remove();
+                tr.appendChild(tdStatus);
+                tr.appendChild(tdTime);
+            }
 
-            tr.appendChild(tdStatus);
-            tr.appendChild(tdTime);
-            tr.appendChild(tdIp);
+
+
             tableBody.appendChild(tr);
         });
     })
