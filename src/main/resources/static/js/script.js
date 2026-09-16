@@ -59,7 +59,10 @@ fetch('/monitor')
                 tr.appendChild(tdIp);
             }
             else {
-                document.getElementById("ip-header").remove();
+                let ipHeader = document.getElementById("ip-header");
+                if (ipHeader !== undefined && ipHeader != null) {
+                    ipHeader.remove();
+                }
                 tr.appendChild(tdStatus);
                 tr.appendChild(tdTime);
             }
